@@ -193,12 +193,10 @@ def poll_for_commit(build_id, images_uploaded)
   puts 'Waiting for commit to finalize'
   sleep 2 # Sleep 2 before the first check so we can catch the 'simple' commits that have no diffs quickly
 
-  # floor: 60 tries * 10 seconds == 10 minutes
-  max_tries = 60
-  # scaling as needed for when there are more than 60 images, 10 seconds per image
-  max_tries = images_uploaded if images_uploaded > max_tries
-  # ceiling 360 * 10 seconds = 3600 seconds = 1 hour
-  max_tries = 360 if images_uploaded > 360
+  # 360 tries * 10 seconds == 1 hour
+  max_tries = 360
+  # scaling as needed
+  max_tries = max_tries + images_uploaded
 
   time_in_seconds = max_tries * 10
   time_in_minutes = time_in_seconds / 60
@@ -219,7 +217,7 @@ def poll_for_commit(build_id, images_uploaded)
       sleep wait_time
     end
   end
-  fail_build("Build not committed after #{total_wait_time} seconds.", build_id)
+  fail_build("Build not committed after #{total_wait_time} seconds (#{total_wait_time / 60} minutes)", build_id)
 end
 
 def upload_images_to_build_with_id(id, images_to_upload, test_image_folder)
