@@ -1,0 +1,20 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:9.5.3
+    environment:
+      - POSTGRES_DB=vizzy
+  app:
+    image: vizzy:latest
+    build:
+      context: .
+      args:
+        RAILS_MASTER_KEY: $RAILS_MASTER_KEY
+    environment:
+      - RAILS_MASTER_KEY=$RAILS_MASTER_KEY
+      - POSTGRES_USER=postgres
+      - RAILS_ENV=ci_test
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
